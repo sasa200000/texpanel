@@ -262,6 +262,38 @@ export default {
 							}
 						}
 						return new Response(JSON.stringify({ success: false, data: [] }, null, 2), { status: 403, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+					} else if (访问路径 === 'admin/users') { // TEXPANEL: مدیریت کاربران
+							const users = JSON.parse(await D1Get(env, 'TEX_USERS') || '[]');
+							if (request.method === 'GET') {
+								return new Response(JSON.stringify({ success: true, data: users }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+							} else if (request.method === 'POST') {
+								const body = await request.json();
+								if (body.action === 'add') {
+									const name = String(body.name || '').trim().slice(0, 48);
+									if (!name) return new Response(JSON.stringify({ error: 'name required' }), { status: 400, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+									if (users.some(u => u.name === name)) return new Response(JSON.stringify({ error: 'duplicate' }), { status: 409, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+									const token = await 生成安全令牌();
+									const limitGB = Math.max(0, Number(body.limitGB) || 0);
+									const days = Math.max(0, Number(body.days) || 0);
+									const u = { name, token, limitGB, days, used: 0, created: Date.now(), expires: days ? Date.now() + days * 864e5 : 0 };
+									users.push(u);
+									await D1Put(env, 'TEX_USERS', JSON.stringify(users));
+									ctx.waitUntil(请求日志记录(env, request, 访问IP, 'TEX_User_Add', config_JSON));
+									return new Response(JSON.stringify({ success: true, data: u }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+								} else if (body.action === 'delete') {
+									const name = String(body.name || '');
+									const left = users.filter(u => u.name !== name);
+									await D1Put(env, 'TEX_USERS', JSON.stringify(left));
+									ctx.waitUntil(请求日志记录(env, request, 访问IP, 'TEX_User_Delete', config_JSON));
+									return new Response(JSON.stringify({ success: true, data: left }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+								} else if (body.action === 'reset') {
+									for (const u of users) if (u.name === String(body.name || '')) u.used = 0;
+									await D1Put(env, 'TEX_USERS', JSON.stringify(users));
+									return new Response(JSON.stringify({ success: true, data: users }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+								}
+								return new Response(JSON.stringify({ error: 'unknown action' }), { status: 400, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
+							}
+						} else if (request.method === 'POST' && 区分大小写访问路径 === 'admin/ADD.txt') { // 保存自定义优选IP
 					} else if (访问路径 === 'admin/check') {// 代理检查
 						const 代理协议 = ['socks5', 'http', 'https', 'turn', 'sstp'].find(类型 => url.searchParams.has(类型)) || null;
 						if (!代理协议) return new Response(JSON.stringify({ error: 'Missing proxy parameter' }), { status: 400, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
@@ -421,38 +453,6 @@ export default {
 								console.error('Failed to save configuration:', error);
 								return new Response(JSON.stringify({ error: 'Failed to save configuration: ' + error.message }), { status: 500, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
 							}
-						} else if (访问路径 === 'admin/users') { // TEXPANEL: مدیریت کاربران
-							const users = JSON.parse(await D1Get(env, 'TEX_USERS') || '[]');
-							if (request.method === 'GET') {
-								return new Response(JSON.stringify({ success: true, data: users }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-							} else if (request.method === 'POST') {
-								const body = await request.json();
-								if (body.action === 'add') {
-									const name = String(body.name || '').trim().slice(0, 48);
-									if (!name) return new Response(JSON.stringify({ error: 'name required' }), { status: 400, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-									if (users.some(u => u.name === name)) return new Response(JSON.stringify({ error: 'duplicate' }), { status: 409, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-									const token = await 生成安全令牌();
-									const limitGB = Math.max(0, Number(body.limitGB) || 0);
-									const days = Math.max(0, Number(body.days) || 0);
-									const u = { name, token, limitGB, days, used: 0, created: Date.now(), expires: days ? Date.now() + days * 864e5 : 0 };
-									users.push(u);
-									await D1Put(env, 'TEX_USERS', JSON.stringify(users));
-									ctx.waitUntil(请求日志记录(env, request, 访问IP, 'TEX_User_Add', config_JSON));
-									return new Response(JSON.stringify({ success: true, data: u }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-								} else if (body.action === 'delete') {
-									const name = String(body.name || '');
-									const left = users.filter(u => u.name !== name);
-									await D1Put(env, 'TEX_USERS', JSON.stringify(left));
-									ctx.waitUntil(请求日志记录(env, request, 访问IP, 'TEX_User_Delete', config_JSON));
-									return new Response(JSON.stringify({ success: true, data: left }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-								} else if (body.action === 'reset') {
-									for (const u of users) if (u.name === String(body.name || '')) u.used = 0;
-									await D1Put(env, 'TEX_USERS', JSON.stringify(users));
-									return new Response(JSON.stringify({ success: true, data: users }, null, 2), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-								}
-								return new Response(JSON.stringify({ error: 'unknown action' }), { status: 400, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-							}
-						} else if (区分大小写访问路径 === 'admin/ADD.txt') { // 保存自定义优选IP
 							try {
 								const customIPs = await request.text();
 								await D1Put(env, 'ADD.txt', customIPs);// 保存到 D1
@@ -6212,41 +6212,73 @@ function 识别运营商(request) {
 async function 获取优选IP池(request, count = 16, 指定端口 = -1) {
     if (!TEX_OPTIMAL_IP_ENABLED) throw new Error('TEXPANEL IP pool disabled');
     const cfport = [443, 2053, 2083, 2087, 2096, 8443];
-    try {
-        const res = await fetch(TEX_OPTIMAL_IP_SOURCE + '?t=' + Date.now(), {
-            headers: { 'Accept': 'application/json' },
-            cf: { cacheTtl: 60 }
-        });
-        if (!res.ok) throw new Error('Scanner HTTP ' + res.status);
-        const data = await res.json();
-        if (!data.results || !Array.isArray(data.results)) throw new Error('Invalid JSON');
+    const delay = ms => new Promise(r => setTimeout(r, ms));
 
-        const seenIPs = new Set();
-        const uniqueIPs = [];
-        for (const r of data.results) {
-            if (r.status === 'online' && r.ip && /^\d+\.\d+\.\d+\.\d+$/.test(r.ip) && !seenIPs.has(r.ip)) {
-                seenIPs.add(r.ip);
-                uniqueIPs.push(r);
-            }
+    // Probe a single Cloudflare edge IP: TCP connect + TLS handshake timing.
+    async function probe(ip, port) {
+        const t0 = Date.now();
+        try {
+            const r = await fetch('https://' + ip + ':' + port + '/', {
+                method: 'HEAD',
+                redirect: 'manual',
+                signal: AbortSignal.timeout(4000),
+                headers: { 'Host': 'cloudflare.com', 'User-Agent': 'TEXPANEL-Scanner/1.0' }
+            });
+            return { ip, port, ms: Date.now() - t0, ok: true };
+        } catch (e) {
+            return { ip, port, ms: 9999, ok: false };
         }
-
-        const onlineIPs = uniqueIPs
-            .sort((a, b) => (a.ms || 9999) - (b.ms || 9999))
-            .slice(0, count);
-
-        if (!onlineIPs.length) throw new Error('No online IPs');
-
-        const formatted = onlineIPs.map((item, index) => {
-            const 目标端口 = 指定端口 === -1 ? cfport[index % cfport.length] : 指定端口;
-            return `${item.ip}:${目标端口}#TEX-${index + 1}-${item.ms}ms`;
-        });
-
-        log(`[TEXPANEL-IP] ${formatted.length} IP دریافت شد. بهترین: ${onlineIPs[0].ms}ms`);
-        return [formatted, formatted.join('\n')];
-    } catch (err) {
-        log(`[TEXPANEL-IP] خطا: ${err.message}`);
-        throw err;
     }
+
+    // Deterministic PRNG so results are stable within one request.
+    let seed = 0;
+    for (const c of (request.headers.get('cf-ray') || String(Date.now()))) seed = (seed * 31 + c.charCodeAt(0)) % 2147483647;
+    const rnd = () => { seed = (seed * 1103515245 + 12345) % 2147483647; return seed / 2147483647; };
+
+    const sources = [
+        'https://www.cloudflare.com/ips-v4',
+        'https://api.cloudflare.com/client/v4/ips'
+    ];
+    let cidrs = null;
+    for (const s of sources) {
+        try {
+            const r = await fetch(s + '?t=' + Date.now(), { cf: { cacheTtl: 300 } });
+            if (!r.ok) continue;
+            const text = (await r.text()).split('\n').map(x => x.trim()).filter(x => /^\d+\.\d+\.\d+\.\d+\/\d+$/.test(x));
+            if (text.length) { cidrs = text; break; }
+        } catch (e) { /* try next source */ }
+    }
+    if (!cidrs || !cidrs.length) throw new Error('Cloudflare IP list unreachable');
+    log(`[TEXPANEL-IP] ${cidrs.length} CIDR دریافت شد.`);
+
+    // Sample one usable host from each CIDR (skip .0 network and .255 broadcast).
+    const candidates = [];
+    for (const cidr of cidrs) {
+        const [base, bits] = cidr.split('/');
+        const b = base.split('.').map(Number);
+        const host = (b[0] << 24 | b[1] << 16 | b[2] << 8 | b[3]) >>> 0;
+        const size = Math.pow(2, 32 - +bits) >>> 0;
+        const off = size > 8 ? 1 + Math.floor(rnd() * (size - 3)) : 0;
+        const v = (host + off) >>> 0;
+        candidates.push([(v >>> 24 & 255), (v >>> 16 & 255), (v >>> 8 & 255), (v & 255)].join('.'));
+    }
+
+    const wanted = Math.min(count, candidates.length);
+    const ports = 指定端口 === -1 ? [443] : [指定端口];
+    const tasks = [];
+    for (let i = 0; i < wanted; i++) tasks.push(probe(candidates[i], ports[i % ports.length]));
+    const results = await Promise.all(tasks);
+    const online = results.filter(r => r.ok).sort((a, b) => a.ms - b.ms).slice(0, count);
+
+    if (!online.length) throw new Error('No online IPs');
+
+    const formatted = online.map((item, index) => {
+        const 目标端口 = 指定端口 === -1 ? cfport[index % cfport.length] : 指定端口;
+        return `${item.ip}:${目标端口}#TEX-${index + 1}-${item.ms}ms`;
+    });
+
+    log(`[TEXPANEL-IP] ${formatted.length} IP دریافت شد. بهترین: ${online[0].ms}ms`);
+    return [formatted, formatted.join('\n')];
 }
 
 async function 生成随机IP(request, count = 16, 指定端口 = -1) {
