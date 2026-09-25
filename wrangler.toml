@@ -1,8 +1,21 @@
-# این فایل رو دقیقاً به اسم "wrangler.toml" توی ریشه‌ی ریپازیتوری بساز
+# TEXPANEL — Cloudflare Workers panel
+# این بخش‌ها را حتماً پر کنید:
+#   account_id        -> از داشبورد Cloudflare
+#   [[d1_databases]]  -> یک دیتابیس D1 بسازید و آیدی آن را بگذارید
+#   [[kv_namespaces]] -> یک KV Namespace بسازید و آیدی آن را بگذارید
 
-name = "matix-itg"
+name = "texpanel"
 main = "worker.js"
 compatibility_date = "2026-08-25"
+workers_dev = true
+
+[vars]
+# PASSWORD, TG_BOT_TOKEN, TG_CHAT_ID را به‌صورت Secret در داشبورد Cloudflare اضافه کنید
+
+[[d1_databases]]
+binding = "D1"
+database_name = "texpanel"
+database_id = ""
 
 [[kv_namespaces]]
 binding = "KV"

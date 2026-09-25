@@ -1,0 +1,12 @@
+{
+  "name": "texpanel",
+  "version": "1.0.0",
+  "description": "TEXPANEL - Cloudflare Workers VPN/proxy panel",
+  "main": "worker.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "keywords": ["cloudflare-workers", "vless", "vmess", "trojan", "proxy-panel"],
+  "license": "MIT"
+}

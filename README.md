@@ -1,133 +1,63 @@
-# Matix Edge — Cloudflare Workers Panel
+# TEXPANEL
 
-**In the name of God**
-
-A lightweight, fast, and easy-to-deploy panel for Cloudflare Workers.
-
-🌐 **Wizard:** [https://matix-wizard.imatixofficel.workers.dev/](https://matix-wizard.imatixofficel.workers.dev/)
+پنل مدیریت پروکسی مبتنی بر **Cloudflare Workers** — سبک، سریع و کاملاً رایگان.
+بدون نیاز به سرور، بدون نیاز به root؛ فقط یک حساب Cloudflare.
 
 ---
 
-## What is this?
+## ✨ امکانات
 
-Matix Edge is a simple, free panel that runs entirely on Cloudflare Workers.
-
-It gives you a clean dashboard to manage your own VLESS / Trojan / Shadowsocks subscription, generate config links, check usage, and control everything from one place.
-
-No server, no VPS, no cost. Just deploy once and use it.
-
----
-
-## Why use it?
-
-- Fast — runs on Cloudflare's global edge network
-- Free — no server, no cost, no maintenance
-- Easy setup — one-click deploy with the Matix Wizard
-- Clean dashboard — bilingual (Persian + English), dark & light theme
-- Smart subscription — automatically pulls clean IPs from the Matix Scanner
-- Built-in Telegram bot — get your config, check status, reset settings
-- Self-update — update the panel from GitHub with one click
-- Usage tracking — see your Worker requests and quota
+- 🌐 **چند پروتکل**: VLESS / VMess / Trojan / socks (همه روی یک Worker)
+- 📡 **اشتراک‌ساز جاافتاده**: لینک سابسکریپشن + تبدیل با بک‌اند دلخواه (subconverter)
+- 🎯 **IPهای منتخب**: منبع IP سفارشی یا استخراج‌شده از بهترین IPهای عمومی
+- 📊 **نمودار مصرف زنده**: نمودار آنی و animated مصرف Worker به‌صورت realtime
+- 🤖 **ربات تلگرام**: مدیریت کامل پنل از داخل تلگرام (وضعیت، ریستارت، آمار)
+- 🔐 **ورود ایمن**: رمز عبور هش‌شده + توکن جلسه + محافظت در برابر کشف نشست
+- 🛡️ **ضد هک**: هدرهای امنیتی سخت‌گیرانه (CSP / X-Frame-Options / CORP)، مسدودسازی درخواست‌های مخرب، اعتبارسنجی نشست
+- 🎨 **تم نئون**: صورتی / زرد فسفری / سبز فسفری / سیاه، حالت روشن و تاریک
+- 🌍 **دوزبانه**: فارسی و انگلیسی در همه‌جا
+- ☁️ **ذخیره‌سازی**: Cloudflare D1 + KV (رایگان)
+- 🔧 **آپدیت از داخل پنل**: بدون نیاز به دستکاری کد
 
 ---
 
-## How to set it up
+## 🚀 راه‌اندازی
 
-The easiest way is using the Matix Wizard:
-
-1. Go to 👉 https://matix-wizard.imatixofficel.workers.dev/
-2. Paste your Cloudflare API Token
-3. Click Start
-
-The Wizard will automatically:
-
-1. Create a KV Namespace
-2. Create the Worker
-3. Set up Variables and Secrets (ADMIN, UUID)
-4. Bind KV to the Worker
-5. Deploy everything
-
-Once it's done, the Wizard shows you your panel URL:
-
-
-
-https://matix-worker.YOURNAME.workers.dev
-
-
-
-Log in at:
-
-
-
-https://matix-worker.YOURNAME.workers.dev/login
-
-
-
-The password is whatever you set as `ADMIN`.
+1. وارد [Cloudflare Dashboard](https://dash.cloudflare.com) شوید.
+2. یک **D1 Database** و یک **KV Namespace** بسازید.
+3. فایل `wrangler.toml` را باز کنید و این‌ها را پر کنید:
+   - `account_id`
+   - نام و آیدی D1 (`[[d1_databases]]`)
+   - نام و آیدی KV (`[[kv_namespaces]]`)
+4. اعتبارنامه‌ها را در متغیرهای محیطی Worker تنظیم کنید:
+   - `PASSWORD` — رمز ورود به پنل
+   - `TG_BOT_TOKEN` — توکن ربات تلگرام (اختیاری)
+   - `TG_CHAT_ID` — آیدی عددی شما (اختیاری)
+5. دیپلوی:
+   ```bash
+   npx wrangler deploy
+   ```
+6. آدرس Worker را باز کنید، رمز را وارد کنید و تمام.
 
 ---
 
-## What you get
+## 🔒 امنیت
 
-A full management dashboard with:
+TEXPANEL به‌صورت پیش‌فرض این‌ها را فعال می‌کند:
 
-- 🔗 Subscription link
-- 🔗 Single node link
-- ⚙️ Protocol & transport settings
-- 📊 Usage chart
-- ⏳ Subscription limits (days / GB)
-- 🌐 Preferred IP source
-- 🛡️ Proxy settings (SOCKS5 / HTTP / HTTPS)
-- 📋 Custom IP list
-- 🤖 Telegram bot activation
-- 🚀 Self-update from GitHub
-- 🧾 Recent logs
+| هدر | مقدار |
+|---|---|
+| `Content-Security-Policy` | `default-src 'self'` + فقط فونت گوگل |
+| `X-Frame-Options` | `DENY` |
+| `X-Content-Type-Options` | `nosniff` |
+| `X-XSS-Protection` | `1; mode=block` |
+| `Cross-Origin-Opener-Policy` | `same-origin` |
+| `Cross-Origin-Resource-Policy` | `same-origin` |
 
----
-
-## How it works behind the scenes
-
-Matix Edge runs entirely on Cloudflare Workers:
-
-1. The Worker handles all incoming requests
-2. Settings are stored in Cloudflare KV
-3. Clean IPs are pulled from the Matix Scanner
-4. Config links are generated on the fly
-5. Telegram bot runs on a webhook
-6. Updates pull directly from GitHub Releases
-
-Everything is serverless and free.
+به‌علاوهٔ نشست‌های کوتاه، توکن CSRF در فرم‌ها و مسدودسازی IPهای مشکوک.
 
 ---
 
-## Good to know
+## 📜 لایسنس
 
-- The panel runs on Cloudflare's free tier for normal usage.
-- The Cloudflare API token is used only during setup and is not stored.
-- After setup, you can revoke the token from the Cloudflare dashboard.
-- No data is collected, no keys are stored, nothing is tracked.
-
----
-
-## Built with
-
-- JavaScript — the Worker
-- Cloudflare Workers — the runtime
-- Cloudflare KV — the storage
-- GitHub Pages / Releases — distribution
-- Vazirmatn + Manrope — the fonts
-
----
-
-## Wizard
-
-👉 https://matix-wizard.imatixofficel.workers.dev/
-
----
-
-## Connect with me
-
-- 📺 YouTube: https://youtube.com/@i.matix7
-- ✈️ Telegram: https://t.me/Imatix7
-
----
+MIT — استفاده آزاد. کپی‌رایت © 2026 TEXPANEL.
