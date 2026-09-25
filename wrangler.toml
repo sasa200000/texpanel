@@ -1,0 +1,9 @@
+# این فایل رو دقیقاً به اسم "wrangler.toml" توی ریشه‌ی ریپازیتوری بساز
+
+name = "matix-itg"
+main = "worker.js"
+compatibility_date = "2026-08-25"
+
+[[kv_namespaces]]
+binding = "KV"
+id = ""
