@@ -1,22 +1,15 @@
-# TEXPANEL — Cloudflare Workers panel
-# این بخش‌ها را حتماً پر کنید:
-#   account_id        -> از داشبورد Cloudflare
-#   [[d1_databases]]  -> یک دیتابیس D1 بسازید و آیدی آن را بگذارید
-#   [[kv_namespaces]] -> یک KV Namespace بسازید و آیدی آن را بگذارید
-
+# TEXPANEL — deployed & configured
 name = "texpanel"
 main = "worker.js"
 compatibility_date = "2026-08-25"
 workers_dev = true
-
-[vars]
-# PASSWORD, TG_BOT_TOKEN, TG_CHAT_ID را به‌صورت Secret در داشبورد Cloudflare اضافه کنید
+account_id = "2c3b7070a7da77f2486b276c38fd013b"
 
 [[d1_databases]]
-binding = "D1"
+binding = "DB"
 database_name = "texpanel"
-database_id = ""
+database_id = "d5f3db73-1860-4beb-a3a0-693423527f2c"
 
 [[kv_namespaces]]
 binding = "KV"
-id = ""
+id = "718a75b9e36c436a87df3ff0ba6a43f8"
