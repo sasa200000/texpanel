@@ -61,3 +61,16 @@ TEXPANEL به‌صورت پیش‌فرض این‌ها را فعال می‌کن
 ## 📜 لایسنس
 
 MIT — استفاده آزاد. کپی‌رایت © 2026 TEXPANEL.
+
+## 📸 اسکرین‌شات‌ها / Screenshots
+
+| فایل | توضیح |
+|---|---|
+| [docs/login.png](docs/login.png) | صفحهٔ ورود (رمز عبور) |
+| [docs/01-overview.png](docs/01-overview.png) | نمای کلی + لینک‌های اتصال |
+| [docs/02-user-management.png](docs/02-user-management.png) | مدیریت کاربران (افزودن/حذف/ریست/کپی لینک) |
+| [docs/03-ip-scanner.png](docs/03-ip-scanner.png) | اسکنر IP تمیز یک‌کلیکی |
+| [docs/04-usage-chart.png](docs/04-usage-chart.png) | نمودار زندهٔ مصرف (canvas) |
+| [docs/05-custom-ip-list.png](docs/05-custom-ip-list.png) | لیست IP دلخواه |
+| [docs/06-telegram-bot.png](docs/06-telegram-bot.png) | تنظیمات ربات تلگرام |
+| [docs/07-logs.png](docs/07-logs.png) | لاگ‌های اخیر |
