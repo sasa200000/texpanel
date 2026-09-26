@@ -204,15 +204,29 @@ export default {
 				} else if (访问路径 === 'login') {//处理登录页面和登录请求
 					const cookies = request.headers.get('Cookie') || '';
 					const authCookie = cookies.split(';').find(c => c.trim().startsWith('auth='))?.split('=')[1];
-					if (authCookie == await MD5MD5(UA + 加密秘钥 + 管理员密码)) return new Response('Redirecting...', { status: 302, headers: { 'Location': '/admin' } });
+					if (authCookie == await MD5MD5(userID + 加密秘钥 + 管理员密码)) return new Response('Redirecting...', { status: 302, headers: { 'Location': '/admin' } });
 					if (request.method === 'POST') {
-						const formData = await request.text();
-						const params = new URLSearchParams(formData);
-						const 输入密码 = params.get('password');
-						if (输入密码 === (typeof 管理员密码 === 'string' ? 管理员密码.replace(/[\r\n]/g, '') : 管理员密码)) {
+						let 输入密码 = null;
+						try {
+							const ct = (request.headers.get('Content-Type') || '').toLowerCase();
+							if (ct.includes('application/json')) {
+								const j = await request.json(); 输入密码 = typeof j.password === 'string' ? j.password : null;
+							} else {
+							const formData = await request.text();
+							const m = /(?:^|&)password=([^&]*)/.exec(formData);
+							输入密码 = m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
+						}
+						} catch (e) {
+						try {
+							const formData = await request.text();
+							const m = /(?:^|&)password=([^&]*)/.exec(formData);
+							输入密码 = m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
+						} catch (e2) {}
+					}
+						if (输入密码 !== null && String(输入密码).trim() === String(管理员密码).replace(/[\r\n]/g, '').trim()) {
 							// 密码正确，设置cookie并返回成功标记
 							const 响应 = new Response(JSON.stringify({ success: true }), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
-							响应.headers.set('Set-Cookie', `auth=${await MD5MD5(UA + 加密秘钥 + 管理员密码)}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=Lax`);
+							响应.headers.set('Set-Cookie', `auth=${await MD5MD5(userID + 加密秘钥 + 管理员密码)}; Path=/; Max-Age=86400; HttpOnly; Secure; SameSite=Lax`);
 							return 响应;
 						}
 					}
@@ -227,7 +241,7 @@ export default {
 					const cookies = request.headers.get('Cookie') || '';
 					const authCookie = cookies.split(';').find(c => c.trim().startsWith('auth='))?.split('=')[1];
 					// 没有cookie或cookie错误，跳转到/login页面
-					if (!authCookie || authCookie !== await MD5MD5(UA + 加密秘钥 + 管理员密码)) return new Response('Redirecting...', { status: 302, headers: { 'Location': '/login' } });
+					if (!authCookie || authCookie !== await MD5MD5(userID + 加密秘钥 + 管理员密码)) return new Response('Redirecting...', { status: 302, headers: { 'Location': '/login' } });
 					if (访问路径 === 'admin/log.json') {// 读取日志内容
 						const 读取日志内容 = await D1Get(env, 'log.json') || '[]';
 						return new Response(读取日志内容, { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8' } });
@@ -569,7 +583,7 @@ export default {
 							const headers = { 'User-Agent': 'TEXPANEL', 'Accept': 'application/vnd.github+json' };
 							if (env.GITHUB_TOKEN) headers['Authorization'] = 'Bearer ' + env.GITHUB_TOKEN;
 							const res = await fetch('https://api.github.com/repos/' + TEX_RELEASE_REPO + '/releases/latest', { headers, cf: { cacheTtl: 0 } });
-							if (!res.ok) throw new Error('GitHub API ' + res.status);
+							if (!res.ok) return new Response(JSON.stringify({ current: await 获取当前版本(env), latest: null, updateAvailable: false, offline: true }), { status: 200, headers: { 'Content-Type': 'application/json;charset=utf-8', 'Cache-Control': 'no-store' } });
 							const data = await res.json();
 							const latest = data.tag_name || null;
 							return new Response(JSON.stringify({
@@ -813,7 +827,7 @@ export default {
 				} else if (访问路径 === 'locations') {//反代locations列表
 					const cookies = request.headers.get('Cookie') || '';
 					const authCookie = cookies.split(';').find(c => c.trim().startsWith('auth='))?.split('=')[1];
-					if (authCookie && authCookie == await MD5MD5(UA + 加密秘钥 + 管理员密码)) return fetch(new Request('https://speed.cloudflare.com/locations', { headers: { 'Referer': 'https://speed.cloudflare.com/' } }));
+					if (authCookie && authCookie == await MD5MD5(userID + 加密秘钥 + 管理员密码)) return fetch(new Request('https://speed.cloudflare.com/locations', { headers: { 'Referer': 'https://speed.cloudflare.com/' } }));
 				} else if (访问路径 === 'robots.txt') return new Response('User-agent: *\nDisallow: /', { status: 200, headers: { 'Content-Type': 'text/plain; charset=UTF-8' } });
 			} else if (!envUUID) return new Response(matrixEdgeSetupNotice('D1'), { status: 404, headers: { 'Content-Type': 'text/html; charset=UTF-8', 'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate', 'Pragma': 'no-cache', 'Expires': '0',
     'Content-Security-Policy': "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self' https:; base-uri 'self'; form-action 'self';",
