@@ -8486,7 +8486,7 @@ function matrixEdgeAdminDashboard() {
         const subUrl = location.origin + '/sub?token=' + u.token;
         const pct = u.limitGB > 0 ? Math.min(100, (u.used||0) / (u.limitGB*1000000) * 100) : 0;
         const exp = u.expires ? new Date(u.expires).toLocaleDateString() : '∞';
-        return '<div class="muted" style="border:1px solid rgba(255,45,149,.25);border-radius:12px;padding:10px 12px">\n          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">\n            <b style="color:var(--text)">' + (u.name) + '</b>\n            <span style="font-size:12px">سقف: ' + (u.limitGB||'∞') + ' GB · <span data-en>limit</span></span>\n            <span style="font-size:12px">انقضا: ' + (exp) + '</span>\n            <span style="flex:1"></span>\n            <button class="btn small" data-copy="' + (subUrl) + '"><span data-fa>کپی لینک</span><span data-en>Copy link</span></button>\n            <button class="btn small" data-reset="' + (u.name) + '"><span data-fa>ریست</span><span data-en>Reset</span></button>\n            <button class="btn small danger" data-del="' + (u.name) + '">✕</button>\n          </div>\n          <div class="usage-bar" style="margin-top:8px"><div class="usage-fill" style="width:' + (pct.toFixed(1)) + '%"></div></div>\n          <div style="font-size:11px;margin-top:4px;word-break:break-all">' + (subUrl) + '</div>\n        </div>';
+        return '<div class="muted" style="border:1px solid rgba(255,45,149,.25);border-radius:12px;padding:10px 12px">\\n          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">\\n            <b style="color:var(--text)">' + (u.name) + '</b>\\n            <span style="font-size:12px">سقف: ' + (u.limitGB||'∞') + ' GB · <span data-en>limit</span></span>\\n            <span style="font-size:12px">انقضا: ' + (exp) + '</span>\\n            <span style="flex:1"></span>\\n            <button class="btn small" data-copy="' + (subUrl) + '"><span data-fa>کپی لینک</span><span data-en>Copy link</span></button>\\n            <button class="btn small" data-reset="' + (u.name) + '"><span data-fa>ریست</span><span data-en>Reset</span></button>\\n            <button class="btn small danger" data-del="' + (u.name) + '">✕</button>\\n          </div>\\n          <div class="usage-bar" style="margin-top:8px"><div class="usage-fill" style="width:' + (pct.toFixed(1)) + '%"></div></div>\\n          <div style="font-size:11px;margin-top:4px;word-break:break-all">' + (subUrl) + '</div>\\n        </div>';
       }).join('') : '<span class="muted"><span data-fa>هنوز کاربری اضافه نشده.</span><span data-en>No users yet.</span></span>';
       el.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
         if (!confirm(b.dataset.del + ' ?')) return;
@@ -8534,13 +8534,13 @@ function matrixEdgeAdminDashboard() {
       out.innerHTML = texScanIPs.map((ip, i) => '<div class="muted" style="border:1px solid rgba(198,255,0,.25);border-radius:10px;padding:7px 10px;display:flex;gap:8px"><b style="color:var(--green)">' + (String(i+1).padStart(2,'0')) + '</b><span>' + (ip) + '</span></div>').join('');
       document.getElementById('texScanSaveBtn').style.display = '';
       const ta = document.getElementById('f_addlist');
-      if (ta){ ta.value = texScanIPs.join('\n'); ta.dispatchEvent(new Event('input')); }
+      if (ta){ ta.value = texScanIPs.join('\\n'); ta.dispatchEvent(new Event('input')); }
       playNotify();
     }catch(e){ out.innerHTML = '<span class="muted" style="color:var(--red)">' + e.message + '</span>'; }
     btn.disabled = false;
   };
   document.getElementById('texScanSaveBtn').onclick = async () => {
-    const r = await fetch('/admin/ADD.txt', { method:'POST', credentials:'same-origin', body: texScanIPs.join('\n') });
+    const r = await fetch('/admin/ADD.txt', { method:'POST', credentials:'same-origin', body: texScanIPs.join('\\n') });
     const j = await r.json().catch(()=>({}));
     if (j.success) alert('✅ ' + texScanIPs.length + ' IP saved');
     else alert('save failed');
